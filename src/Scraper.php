@@ -30,4 +30,21 @@ class Scraper
 
         return $this->httpClient->get($url);
     }
+
+    public function fetchWithRetry($url, $retry = 3)
+    {
+
+        $attempt = 0;
+
+        while ($attempt < $retry) {
+            try {
+                return $this->fetch($url);
+            } catch (Exception $e) {
+                $attempt++;
+                usleep(200000); // 0.2초 대기
+            }
+        }
+
+        throw new Exception("Failed to fetch after {$retry} attempts");
+    }
 }
