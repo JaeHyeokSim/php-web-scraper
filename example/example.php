@@ -1,16 +1,13 @@
 <?php
 
 require_once "../src/Scraper.php";
-require_once "../src/Parser.php";
 
-$scraper = new Scraper();
-$html = $scraper->fetch("https://example.com");
+$httpClient = new HttpClient();
+$cache = new MemoryCache();
+$rateLimiter = new RateLimiter(1); // 초당 1회
 
-$parser = new Parser();
-$parser->load($html);
+$scraper = new Scraper($httpClient, $cache, $rateLimiter);
 
-$nodes = $parser->query("//h1");
+$html = $scraper->fetchWithRetry("https://example.com");
 
-foreach ($nodes as $node) {
-	echo $node->nodeValue . "\n";
-}
+echo $html;
