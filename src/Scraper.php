@@ -2,17 +2,22 @@
 
 class Scraper {
 
-	public function fetch($url) {
+	private $httpClient;
+	private $cache;
 
-		$ch = curl_init();
+	public function __construct($httpClient, $cache = null) {
+		$this->httpClient = $httpClient;
+		$this->cache = $cache;
+	}
 
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	public function fetch($url, $ttl = 60) {
 
-		$html = curl_exec($ch);
+		if ($this->cache) {
+			return $this->cache->remember($url, $ttl, function() use ($url) {
+				return $this->httpClient->get($url);
+			});
+		}
 
-		curl_close($ch);
-
-		return $html;
+		return $this->httpClient->get($url);
 	}
 }
